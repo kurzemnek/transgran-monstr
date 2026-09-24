@@ -6,7 +6,7 @@
 
 <img src="docs/monster.png" alt="Монстр" width="640">
 
-[![версия](https://img.shields.io/badge/версия-1.5-39FF14?style=flat-square)](https://github.com/kurzemnek/transgran-monstr/releases)
+[![версия](https://img.shields.io/badge/версия-1.5.1-39FF14?style=flat-square)](https://github.com/kurzemnek/transgran-monstr/releases)
 [![лицензия](https://img.shields.io/badge/лицензия-MIT-FF00D4?style=flat-square)](LICENSE)
 [![платформы](https://img.shields.io/badge/Windows%20%C2%B7%20macOS%20%C2%B7%20Linux-00F0FF?style=flat-square)](#скачать)
 [![зависимости](https://img.shields.io/badge/зависимостей-0-FFE600?style=flat-square)](#что-внутри)
@@ -51,7 +51,7 @@
 РАЗВЕДКА
 ──────────────────────────────────────────────
   [ОСТАВИТЬ]  ID
-  [СОЖРАТЬ ]  Название        · похоже на имя человека
+  [СОЖРАТЬ ]  Название        · персональное поле по названию
   [ХЕШ     ]  Телефон         · станет ключом склейки
   [ХЕШ     ]  E-mail          · станет ключом склейки
   [ОСТАВИТЬ]  Сумма

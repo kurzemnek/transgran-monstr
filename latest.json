@@ -1,16 +1,9 @@
 {
-  "version": "1.5",
+  "version": "1.5.1",
   "url": "https://github.com/kurzemnek/transgran-monstr/releases/latest/download/TRANSGRAN-MONSTR.exe",
-  "sha256": "9019ffc19abbad415d7bb97892493bf25422fdb460369430de2c0c3499716805",
-  "size": 11074438,
+  "sha256": "f25fa731de1f0a5cf8f1f11916250e9952dbf7e0e77c7f04acd84001567703d4",
+  "size": 11074311,
   "notes": [
-    "сбой показывает окно с отчётом — что сломалось, где и на какой версии",
-    "отчёт чистится от контактов и путей",
-    "обратная связь и обращение об ошибке в одну кнопку"
-  ],
-  "mac": {
-    "url": "https://github.com/kurzemnek/transgran-monstr/releases/latest/download/TRANSGRAN-MONSTR-macos.zip",
-    "sha256": "bf580cb777965e0eae42ae9553125f867418a2c4dd98bd0b6b9e76407f71f4df",
-    "size": 18687109
-  }
+    "причина решения по колонке больше не врёт"
+  ]
 }
