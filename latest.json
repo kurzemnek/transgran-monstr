@@ -5,5 +5,10 @@
   "size": 11049698,
   "notes": [
     "пропавший файл вместо трейсбека даёт строку «не найден»"
-  ]
+  ],
+  "mac": {
+    "url": "https://github.com/kurzemnek/transgran-monstr/releases/latest/download/TRANSGRAN-MONSTR-macos.zip",
+    "sha256": "0075240a6e3ff88b4f86fea262374502771593e797f5fa3578b06f1114f3755e",
+    "size": 18646110
+  }
 }
