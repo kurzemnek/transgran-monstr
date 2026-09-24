@@ -1,0 +1,11 @@
+build/
+dist/
+__pycache__/
+*.pyc
+*.spec
+*.wav
+*.exe
+salt.txt
+settings.json
+*_обезличено.csv
+.env
