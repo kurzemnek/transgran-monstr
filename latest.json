@@ -1,17 +1,9 @@
 {
-  "version": "1.4",
+  "version": "1.4.1",
   "url": "https://github.com/kurzemnek/transgran-monstr/releases/latest/download/TRANSGRAN-MONSTR.exe",
-  "sha256": "984d8356563f51c3887f20de537adbeb88735428477a5c50905ff1537d4baee7",
-  "size": 11051024,
+  "sha256": "99b4c8c0e8ca1f29b07800c413fd561a1db2e75238aebfff5ed64a2da6eddf8f",
+  "size": 11049698,
   "notes": [
-    "сборка под macOS — universal, идёт и на Apple Silicon, и на Intel",
-    "обновление берёт файл своей системы",
-    "ключ закрыт правами и на Windows",
-    "при первом запуске видно, что ключ только что создан"
-  ],
-  "mac": {
-    "url": "https://github.com/kurzemnek/transgran-monstr/releases/latest/download/TRANSGRAN-MONSTR-macos.zip",
-    "sha256": "63e8802ca103cdbdef98e23494fd0994343706eb6388dcce3f0683b14d98552c",
-    "size": 18645182
-  }
+    "пропавший файл вместо трейсбека даёт строку «не найден»"
+  ]
 }

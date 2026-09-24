@@ -446,7 +446,7 @@ def save_salt(value):
             pass
 
 
-VERSION = '1.4'
+VERSION = '1.4.1'
 # Манифест обновления — обычный JSON на любом статическом хостинге:
 #   {"version": "1.3",
 #    "url": "https://.../TRANSGRAN-MONSTR.exe",
@@ -1437,6 +1437,9 @@ def gui(preset=None):
     # ── страница ЧТО НОВОГО ──────────────────────────────────────────────────
     news = pages['ЧТО НОВОГО']
     CHANGELOG = (
+        ('1.4.1', '24 сентября 2026', (
+            'пропавший файл вместо трейсбека даёт строку «не найден»',
+        )),
         ('1.4', '24 сентября 2026', (
             'сборка под macOS — universal, идёт и на Apple Silicon, и на Intel',
             'обновление берёт файл своей системы: маковская копия качает архив, windows-копия exe',
@@ -1588,11 +1591,19 @@ def gui(preset=None):
     def show(paths):
         if isinstance(paths, str):
             paths = [paths]
+        gone = [p for p in paths if not os.path.exists(p)]
         paths = [p for p in paths if os.path.exists(p)]
         if not paths:
+            if gone:
+                switch('РАЗВЕДКА')
+                clear()
+                say('НЕ НАЙДЕН: ' + os.path.basename(gone[0]), 'red')
+                status.configure(text='цель не найдена', fg=RED)
             return
         switch('РАЗВЕДКА')
         clear()
+        if gone:
+            say('ПРОПУЩЕНО ФАЙЛОВ: %d — их нет по указанному пути' % len(gone), 'hash')
         state['paths'] = paths
         path = paths[0]
         state['path'] = path
@@ -1742,7 +1753,15 @@ def gui(preset=None):
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith('-')]
     if '--cli' in sys.argv and args:
-        out, plan, bad, info = run_file(args[0], out_dir=load_settings()['out_dir'])
+        path = args[0]
+        if not os.path.exists(path):
+            print('файл не найден: ' + path)
+            sys.exit(2)
+        try:
+            out, plan, bad, info = run_file(path, out_dir=load_settings()['out_dir'])
+        except Exception as e:
+            print('файл не обработан: %s' % e)
+            sys.exit(2)
         for name, act, why in plan:
             print(f'  {act:5s} {name}' + (f' — {why}' if why else ''))
         print(f'  ключ {info["fingerprint"]}')

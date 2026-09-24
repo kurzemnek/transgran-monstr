@@ -97,6 +97,16 @@ try:
 except ValueError:
     check('без контрольной суммы не качает', True)
 
+print('\n── пропавший файл объясняется словами ──')
+import subprocess as _sp
+here = os.path.dirname(os.path.abspath(__file__))
+r = _sp.run([sys.executable, os.path.join(here, 'anonymizer.py'),
+             os.path.join(tmp, 'нет-такого.csv'), '--cli'],
+            capture_output=True, text=True, timeout=60)
+check('код возврата 2', r.returncode == 2, str(r.returncode))
+check('сказано, что файл не найден', 'файл не найден' in r.stdout, r.stdout.strip()[:60])
+check('трейсбека нет', 'Traceback' not in (r.stdout + r.stderr))
+
 print('\n── ключ у каждой машины свой ──')
 import stat as _stat
 was_dir, was_here = A.salt_dir, A.HERE
