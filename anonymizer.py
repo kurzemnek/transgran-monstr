@@ -430,7 +430,15 @@ def save_salt(value):
     path = salt_path()
     with open(path, 'w', encoding='utf-8') as f:
         f.write(value.strip())
-    if not IS_WIN:
+    if IS_WIN:
+        user = os.environ.get('USERNAME')
+        if user:
+            try:
+                subprocess.run(['icacls', path, '/inheritance:r', '/grant:r', user + ':F'],
+                               capture_output=True, timeout=10, creationflags=0x08000000)
+            except Exception:
+                pass
+    else:
         try:
             os.chmod(path, 0o600)
             os.chmod(salt_dir(), 0o700)
@@ -438,7 +446,7 @@ def save_salt(value):
             pass
 
 
-VERSION = '1.3'
+VERSION = '1.4'
 # Манифест обновления — обычный JSON на любом статическом хостинге:
 #   {"version": "1.3",
 #    "url": "https://.../TRANSGRAN-MONSTR.exe",
@@ -1130,6 +1138,8 @@ def gui(preset=None):
              font=(MONO, 12), fg=CYAN, bg=BG).pack(anchor='w', pady=(10, 0))
 
     # ── вкладки ──────────────────────────────────────────────────────────────
+    state['key_fresh'] = salt_is_new()   # ключа на этой машине ещё не было
+
     tabbar = tk.Frame(root, bg=BG, padx=22)
     tabbar.pack(fill='x', pady=(8, 0))
     body = tk.Frame(root, bg=BG)
@@ -1147,7 +1157,10 @@ def gui(preset=None):
         pages[name].pack(fill='both', expand=True)
         for n, lbl in tabs.items():
             active = (n == name)
-            lbl.configure(fg=BG if active else ACID, bg=ACID if active else PANEL)
+            if n == 'КЛЮЧ' and state.get('key_fresh') and not active:
+                lbl.configure(fg=BG, bg=YELLOW)
+            else:
+                lbl.configure(fg=BG if active else ACID, bg=ACID if active else PANEL)
 
     for name in TABS:
         lbl = tk.Label(tabbar, text=' ' + name + ' ', font=(MONO, 9, 'bold'),
@@ -1249,7 +1262,6 @@ def gui(preset=None):
 
     # ── страница КЛЮЧ ────────────────────────────────────────────────────────
     keyp = pages['КЛЮЧ']
-    fresh = salt_is_new()
     salt = get_salt()
     fp_var = tk.StringVar(value=salt_fingerprint(salt))
 
@@ -1264,6 +1276,11 @@ def gui(preset=None):
     tk.Label(keyp, text=salt_path(), font=(MONO, 9), fg=DIM, bg=BG,
              wraplength=880, justify='left').pack(anchor='w', pady=(0, 14))
 
+    if state.get('key_fresh'):
+        tk.Label(keyp, text='Ключ создан только что и существует в одном экземпляре.\n'
+                            'Пока копии нет, склейка живёт только на этом компьютере.',
+                 font=(MONO, 10), fg=YELLOW, bg=BG, justify='left').pack(anchor='w', pady=(0, 14))
+
     keybtns = tk.Frame(keyp, bg=BG)
     keybtns.pack(anchor='w')
     key_status = tk.Label(keyp, text='', font=(MONO, 10), fg=DIM, bg=BG, justify='left')
@@ -1277,6 +1294,8 @@ def gui(preset=None):
         with open(p, 'w', encoding='utf-8') as f:
             f.write(get_salt())
         key_status.configure(text='копия ключа сохранена\nхраните как пароль: по ней восстанавливается склейка', fg=ACID)
+        state['key_fresh'] = False
+        switch(state.get('tab') or 'КЛЮЧ')
 
     def import_key():
         p = filedialog.askopenfilename(title='Файл ключа', filetypes=[('Ключ', '*.txt'), ('Все файлы', '*.*')])
@@ -1418,6 +1437,12 @@ def gui(preset=None):
     # ── страница ЧТО НОВОГО ──────────────────────────────────────────────────
     news = pages['ЧТО НОВОГО']
     CHANGELOG = (
+        ('1.4', '24 сентября 2026', (
+            'сборка под macOS — universal, идёт и на Apple Silicon, и на Intel',
+            'обновление берёт файл своей системы: маковская копия качает архив, windows-копия exe',
+            'ключ закрыт правами и на Windows — до этого так было только на Mac и Linux',
+            'при первом запуске видно, что ключ только что создан и копии у него нет',
+        )),
         ('1.3', '24 сентября 2026', (
             'формулы из CRM больше не попадают в выходной файл — Excel не выполнит их при открытии',
             'книги Excel с раздуванием и объявлениями сущностей отклоняются до чтения',

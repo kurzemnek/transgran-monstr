@@ -97,6 +97,28 @@ try:
 except ValueError:
     check('без контрольной суммы не качает', True)
 
+print('\n── ключ у каждой машины свой ──')
+import stat as _stat
+was_dir, was_here = A.salt_dir, A.HERE
+d1, d2 = tempfile.mkdtemp(), tempfile.mkdtemp()
+try:
+    A.HERE = tempfile.mkdtemp()            # чтобы не подхватился ключ из папки программы
+    A.salt_dir = lambda: d1
+    k1 = A.get_salt()
+    A.salt_dir = lambda: d2
+    k2 = A.get_salt()
+    check('ключ длиной 64 символа', len(k1) == 64, str(len(k1)))
+    check('на другой машине ключ другой', k1 != k2)
+    A.salt_dir = lambda: d1
+    check('на своей машине ключ не меняется', A.get_salt() == k1)
+    check('один номер под двумя ключами даёт разные хеши',
+          A.make_key(k1, '79991234567') != A.make_key(k2, '79991234567'))
+    if not A.IS_WIN:
+        mode = _stat.S_IMODE(os.stat(os.path.join(d1, 'salt.txt')).st_mode)
+        check('ключ закрыт от чужих', mode == 0o600, oct(mode))
+finally:
+    A.salt_dir, A.HERE = was_dir, was_here
+
 print('\n── обновление берёт файл своей системы ──')
 win_only = {'version': '9.9', 'url': 'https://github.com/kurzemnek/transgran-monstr/releases/latest/download/TRANSGRAN-MONSTR.exe',
             'sha256': 'a' * 64}

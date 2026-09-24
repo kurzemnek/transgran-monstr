@@ -1,17 +1,12 @@
 {
-  "version": "1.3",
+  "version": "1.4",
   "url": "https://github.com/kurzemnek/transgran-monstr/releases/latest/download/TRANSGRAN-MONSTR.exe",
-  "sha256": "f3717f553c79b9c4f959b20de2f0f8683c8336d065054a816d15a403d4ac2fed",
-  "size": 11048179,
+  "sha256": "984d8356563f51c3887f20de537adbeb88735428477a5c50905ff1537d4baee7",
+  "size": 11051024,
   "notes": [
-    "формулы из CRM не попадают в выходной файл",
-    "книги Excel с раздуванием и сущностями отклоняются",
-    "ключ закрыт правами, источник обновления закреплён",
-    "проверка готового файла стала быстрее"
-  ],
-  "mac": {
-    "url": "https://github.com/kurzemnek/transgran-monstr/releases/latest/download/TRANSGRAN-MONSTR-macos.zip",
-    "sha256": "23e8f519b5bee468e3ff7ffa999f8e94a8478c2afa5373e079e6f3ae7d7c15ea",
-    "size": 18643812
-  }
+    "сборка под macOS — universal, идёт и на Apple Silicon, и на Intel",
+    "обновление берёт файл своей системы",
+    "ключ закрыт правами и на Windows",
+    "при первом запуске видно, что ключ только что создан"
+  ]
 }
