@@ -8,5 +8,10 @@
     "обновление берёт файл своей системы",
     "ключ закрыт правами и на Windows",
     "при первом запуске видно, что ключ только что создан"
-  ]
+  ],
+  "mac": {
+    "url": "https://github.com/kurzemnek/transgran-monstr/releases/latest/download/TRANSGRAN-MONSTR-macos.zip",
+    "sha256": "63e8802ca103cdbdef98e23494fd0994343706eb6388dcce3f0683b14d98552c",
+    "size": 18645182
+  }
 }
