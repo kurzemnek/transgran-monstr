@@ -60,6 +60,8 @@ jobs:
 
       - name: Вписать сборку в манифест обновления
         run: |
+          git fetch origin main
+          git checkout -B main origin/main
           python - <<'PY'
           import hashlib, io, json, os
           z = 'dist/TRANSGRAN-MONSTR-macos.zip'
@@ -78,4 +80,4 @@ jobs:
           git config user.name "Valery Kurzemnek"
           git config user.email "vkurzemnek@gmail.com"
           git add latest.json
-          git diff --cached --quiet || (git commit -m "Манифест: контрольная сумма сборки под Mac" && git push)
+          git diff --cached --quiet || (git commit -m "Манифест: контрольная сумма сборки под Mac" && git push origin main)
