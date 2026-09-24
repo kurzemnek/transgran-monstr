@@ -13,8 +13,8 @@
 
 <br>
 
-[![Скачать для Windows](https://img.shields.io/badge/СКАЧАТЬ-WINDOWS-39FF14?style=for-the-badge&logo=windows&logoColor=0B0B0B&labelColor=0B0B0B)](https://github.com/kurzemnek/transgran-monstr/releases/latest/download/TRANSGRAN-MONSTR.exe)
-[![Сайт автора](https://img.shields.io/badge/САЙТ-АВТОРА-FF00D4?style=for-the-badge&logoColor=0B0B0B&labelColor=0B0B0B)](https://kurzemnek.ru)
+[![Скачать для Windows](https://img.shields.io/badge/СКАЧАТЬ_ДЛЯ_WINDOWS-39FF14?style=for-the-badge&logo=windows&logoColor=0B0B0B)](https://github.com/kurzemnek/transgran-monstr/releases/latest/download/TRANSGRAN-MONSTR.exe)
+[![Сайт автора](https://img.shields.io/badge/САЙТ_АВТОРА-FF00D4?style=for-the-badge&logo=safari&logoColor=0B0B0B)](https://kurzemnek.ru)
 
 </div>
 
