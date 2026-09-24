@@ -14,6 +14,7 @@
 <br>
 
 <a href="https://github.com/kurzemnek/transgran-monstr/releases/latest/download/TRANSGRAN-MONSTR.exe"><img src="docs/btn-windows.svg" alt="Скачать для Windows" height="61"></a>
+<a href="https://github.com/kurzemnek/transgran-monstr/releases/latest/download/TRANSGRAN-MONSTR-macos.zip"><img src="docs/btn-mac.svg" alt="Скачать для Mac" height="61"></a>
 <a href="https://kurzemnek.ru"><img src="docs/btn-site.svg" alt="Сайт автора" height="61"></a>
 
 </div>
@@ -115,9 +116,12 @@ ID    Телефон (хеш)                     Сумма
 ## Скачать
 
 **Windows:** [TRANSGRAN-MONSTR.exe](https://github.com/kurzemnek/transgran-monstr/releases/latest/download/TRANSGRAN-MONSTR.exe) — один файл, ничего ставить не нужно.
-Все версии лежат на [странице релизов](https://github.com/kurzemnek/transgran-monstr/releases).
 
-**macOS и Linux:** программа запускается из исходников, нужен Python 3.9+ — [как](#собрать-из-исходников).
+**macOS:** [TRANSGRAN-MONSTR-macos.zip](https://github.com/kurzemnek/transgran-monstr/releases/latest/download/TRANSGRAN-MONSTR-macos.zip) — universal, работает и на Apple Silicon, и на Intel. Распаковать и перетащить в «Программы».
+
+**Linux:** запуск из исходников, нужен Python 3.9+ — [как](#собрать-из-исходников).
+
+Все версии лежат на [странице релизов](https://github.com/kurzemnek/transgran-monstr/releases).
 
 При первом запуске Windows покажет предупреждение SmartScreen: файл не подписан
 сертификатом издателя. «Подробнее» → «Выполнить в любом случае». На macOS —
