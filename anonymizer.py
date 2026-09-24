@@ -31,6 +31,7 @@ import threading
 import shutil
 import subprocess
 import tempfile
+import urllib.parse
 import urllib.request
 import zipfile
 from decimal import Decimal, InvalidOperation
@@ -178,10 +179,24 @@ def looks_like_name(text, weak=False):
     return weak and any(rx.search(t) for rx in NAME_RX_WEAK)
 
 
+def maybe_pii(text):
+    """Дешёвый отсев перед разбором.
+
+    Персональные данные всегда содержат либо цифру, либо собачку, либо
+    заглавную букву. Строка «оплачено» не подходит ни под один разбор,
+    и тратить на неё десяток регулярных выражений незачем — на большой
+    выгрузке такой отсев снимает большую часть работы проверки.
+    """
+    for ch in text:
+        if ch.isdigit() or ch == '@' or ch.isupper():
+            return True
+    return False
+
+
 def has_pii(text, weak=False):
     """Единая проверка для гейта."""
     t = (text or '').strip()
-    if not t:
+    if not t or not maybe_pii(t):
         return None
     if looks_like_phone(t):
         return 'телефон'
@@ -225,7 +240,8 @@ def read_table(path):
 
 
 def read_csv(path):
-    raw = open(path, 'rb').read()
+    with open(path, 'rb') as f:
+        raw = f.read()
     for encoding in ('utf-8-sig', 'cp1251', 'utf-8'):
         try:
             text = raw.decode(encoding)
@@ -245,19 +261,45 @@ def read_csv(path):
     return rows[0], rows[1:]
 
 
+MAX_XML_BYTES = 64 * 1024 * 1024      # потолок на один распакованный файл
+MAX_TOTAL_BYTES = 256 * 1024 * 1024   # и на всё вместе
+
+
+def _safe_xml(z, name, budget):
+    """Читает кусок архива с оглядкой на его настоящий размер.
+
+    Книга на сто килобайт разворачивается в шестьдесят мегабайт — достаточно
+    записать одну строку миллион раз. Объявленный размер известен заранее,
+    поэтому такой файл отклоняется до чтения, а не после.
+    """
+    info = z.getinfo(name)
+    if info.file_size > MAX_XML_BYTES or info.file_size > budget[0]:
+        raise ValueError('файл внутри книги слишком большой: %.0f МБ'
+                         % (info.file_size / 1048576))
+    budget[0] -= info.file_size
+    data = z.read(name)
+    head = data[:2048].lstrip()
+    if head.startswith(b'<?xml'):
+        head = head.split(b'?>', 1)[-1].lstrip()
+    if head.startswith(b'<!DOCTYPE') or b'<!ENTITY' in data[:8192]:
+        raise ValueError('книга содержит объявления сущностей — такие файлы не читаю')
+    return data
+
+
 def read_xlsx(path):
     """Минимальный читатель xlsx без сторонних библиотек."""
     ns = '{http://schemas.openxmlformats.org/spreadsheetml/2006/main}'
+    budget = [MAX_TOTAL_BYTES]
     with zipfile.ZipFile(path) as z:
         shared = []
         if 'xl/sharedStrings.xml' in z.namelist():
-            root = ET.fromstring(z.read('xl/sharedStrings.xml'))
+            root = ET.fromstring(_safe_xml(z, 'xl/sharedStrings.xml', budget))
             for si in root.findall(f'{ns}si'):
                 shared.append(''.join(t.text or '' for t in si.iter(f'{ns}t')))
         sheets = [n for n in z.namelist() if n.startswith('xl/worksheets/sheet')]
         if not sheets:
             raise ValueError('в файле нет листов')
-        root = ET.fromstring(z.read(sorted(sheets)[0]))
+        root = ET.fromstring(_safe_xml(z, sorted(sheets)[0], budget))
         rows = []
         for row in root.iter(f'{ns}row'):
             cells = {}
@@ -366,12 +408,14 @@ def get_salt():
     """
     path = salt_path()
     if os.path.exists(path):
-        value = open(path, encoding='utf-8').read().strip()
+        with open(path, encoding='utf-8') as f:
+            value = f.read().strip()
         if len(value) >= 32:
             return value
     legacy = os.path.join(HERE, 'salt.txt')       # ключ старых версий, рядом с exe
     if os.path.exists(legacy):
-        value = open(legacy, encoding='utf-8').read().strip()
+        with open(legacy, encoding='utf-8') as f:
+            value = f.read().strip()
         if len(value) >= 32:
             save_salt(value)
             return value
@@ -381,12 +425,20 @@ def get_salt():
 
 
 def save_salt(value):
+    """Ключ пишем только для владельца: по нему хеши сводятся с телефонами."""
     os.makedirs(salt_dir(), exist_ok=True)
-    with open(salt_path(), 'w', encoding='utf-8') as f:
+    path = salt_path()
+    with open(path, 'w', encoding='utf-8') as f:
         f.write(value.strip())
+    if not IS_WIN:
+        try:
+            os.chmod(path, 0o600)
+            os.chmod(salt_dir(), 0o700)
+        except OSError:
+            pass
 
 
-VERSION = '1.2'
+VERSION = '1.3'
 # Манифест обновления — обычный JSON на любом статическом хостинге:
 #   {"version": "1.3",
 #    "url": "https://.../TRANSGRAN-MONSTR.exe",
@@ -624,11 +676,32 @@ def gate(header, rows):
     return sorted(bad.items())
 
 
+RE_NUMERIC = re.compile(r'^[-+]?\d+(?:[.,]\d+)?$')
+
+
+def csv_safe(value):
+    """Обезвреживает формулы в выходном файле.
+
+    Excel и Calc выполняют ячейку, начинающуюся с =, +, @ или минуса: строка
+    вида =HYPERLINK("http://…") превращается в кликабельную ловушку, а
+    =cmd|'/c calc'!A1 — в попытку запуска. Данные приехали из CRM, где эти
+    строки мог ввести кто угодно, поэтому перед записью ставим апостроф —
+    редактор покажет текст как есть и считать его не станет.
+    """
+    v = '' if value is None else str(value)
+    if not v:
+        return v
+    if v[0] in '=@\t\r' or (v[0] in '+-' and not RE_NUMERIC.match(v)):
+        return "'" + v
+    return v
+
+
 def write_csv(path, header, rows):
     with open(path, 'w', encoding='utf-8-sig', newline='') as f:
         w = csv.writer(f, delimiter=';')
-        w.writerow(header)
-        w.writerows(rows)
+        w.writerow([csv_safe(h) for h in header])
+        for row in rows:
+            w.writerow([csv_safe(v) for v in row])
 
 
 def run_file(path, log=print, out_dir=''):
@@ -670,7 +743,27 @@ def app_file():
     return sys.executable if getattr(sys, 'frozen', False) else os.path.abspath(__file__)
 
 
+ALLOWED_HOSTS = ('github.com', 'raw.githubusercontent.com', 'objects.githubusercontent.com',
+                 'release-assets.githubusercontent.com', 'kurzemnek.ru', 'www.kurzemnek.ru')
+
+
+def trusted_url(url):
+    """Программа скачивает и запускает файл, поэтому источник закреплён.
+
+    Проверяется и схема, и хост: без этого достаточно подменить манифест,
+    чтобы указать на любой адрес, а контрольная сумма в том же манифесте
+    от подмены не спасает — её пишет тот же, кто пишет ссылку.
+    """
+    p = urllib.parse.urlparse(url or '')
+    if p.scheme != 'https':
+        return False
+    host = (p.hostname or '').lower()
+    return any(host == h or host.endswith('.' + h) for h in ALLOWED_HOSTS)
+
+
 def fetch_manifest(url=UPDATE_URL, timeout=6):
+    if not trusted_url(url):
+        raise ValueError('адрес обновления не из доверенного списка')
     req = urllib.request.Request(url, headers={'User-Agent': 'TransgranMonstr/' + VERSION})
     with urllib.request.urlopen(req, timeout=timeout) as resp:
         return json.loads(resp.read().decode('utf-8'))
@@ -693,6 +786,10 @@ def check_update(done, url=UPDATE_URL):
 def download_update(info, progress=None):
     """Качает новый файл во временную папку и сверяет контрольную сумму."""
     url = info['url']
+    if not trusted_url(url):
+        raise ValueError('ссылка на файл не из доверенного списка')
+    if not (info.get('sha256') or '').strip():
+        raise ValueError('в манифесте нет контрольной суммы')
     tmp = os.path.join(tempfile.gettempdir(), 'transgran_update.bin')
     req = urllib.request.Request(url, headers={'User-Agent': 'TransgranMonstr/' + VERSION})
     with urllib.request.urlopen(req, timeout=30) as resp, open(tmp, 'wb') as f:
@@ -901,7 +998,7 @@ def gui(preset=None):
     title_lbl = tk.Label(inner, text='ТРАНСГРАНИЧНЫЙ МОНСТР', font=(MONO, 26, 'bold'),
                          fg=ACID, bg=BG)
     title_lbl.pack(side='left')
-    tk.Label(inner, text='v1.2', font=(MONO, 11), fg=CYAN, bg=BG).pack(side='left',
+    tk.Label(inner, text='v1.3', font=(MONO, 11), fg=CYAN, bg=BG).pack(side='left',
                                                                        padx=(12, 0), pady=(14, 0))
     mon_w = len(_IDLE[0]) * MON_PIX
     mon_h = len(_IDLE) * MON_PIX
@@ -1130,14 +1227,16 @@ def gui(preset=None):
                                          initialfile='transgran-key.txt')
         if not p:
             return
-        open(p, 'w', encoding='utf-8').write(get_salt())
+        with open(p, 'w', encoding='utf-8') as f:
+            f.write(get_salt())
         key_status.configure(text='копия ключа сохранена\nхраните как пароль: по ней восстанавливается склейка', fg=ACID)
 
     def import_key():
         p = filedialog.askopenfilename(title='Файл ключа', filetypes=[('Ключ', '*.txt'), ('Все файлы', '*.*')])
         if not p:
             return
-        value = open(p, encoding='utf-8-sig').read().strip()
+        with open(p, encoding='utf-8-sig') as f:
+            value = f.read().strip()
         if len(value) < 32:
             key_status.configure(text='это не ключ: короче 32 символов', fg=RED)
             return
@@ -1272,6 +1371,13 @@ def gui(preset=None):
     # ── страница ЧТО НОВОГО ──────────────────────────────────────────────────
     news = pages['ЧТО НОВОГО']
     CHANGELOG = (
+        ('1.3', '24 сентября 2026', (
+            'формулы из CRM больше не попадают в выходной файл — Excel не выполнит их при открытии',
+            'книги Excel с раздуванием и объявлениями сущностей отклоняются до чтения',
+            'ключ хеширования закрыт от других пользователей компьютера',
+            'источник обновления закреплён: программа качает только с проверенных адресов',
+            'проверка готового файла стала быстрее',
+        )),
         ('1.2', '22 сентября 2026', (
             'несколько файлов за один раз — выделяйте пачкой или бросайте на иконку',
             'настройки: своя папка для готовых файлов, музыка при запуске',
