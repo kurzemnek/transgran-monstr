@@ -1,14 +1,11 @@
 {
-  "version": "1.4.1",
+  "version": "1.5",
   "url": "https://github.com/kurzemnek/transgran-monstr/releases/latest/download/TRANSGRAN-MONSTR.exe",
-  "sha256": "99b4c8c0e8ca1f29b07800c413fd561a1db2e75238aebfff5ed64a2da6eddf8f",
-  "size": 11049698,
+  "sha256": "9019ffc19abbad415d7bb97892493bf25422fdb460369430de2c0c3499716805",
+  "size": 11074438,
   "notes": [
-    "пропавший файл вместо трейсбека даёт строку «не найден»"
-  ],
-  "mac": {
-    "url": "https://github.com/kurzemnek/transgran-monstr/releases/latest/download/TRANSGRAN-MONSTR-macos.zip",
-    "sha256": "0075240a6e3ff88b4f86fea262374502771593e797f5fa3578b06f1114f3755e",
-    "size": 18646110
-  }
+    "сбой показывает окно с отчётом — что сломалось, где и на какой версии",
+    "отчёт чистится от контактов и путей",
+    "обратная связь и обращение об ошибке в одну кнопку"
+  ]
 }

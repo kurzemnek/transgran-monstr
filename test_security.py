@@ -97,6 +97,30 @@ try:
 except ValueError:
     check('без контрольной суммы не качает', True)
 
+print('\n── отчёт о сбое не выносит данные ──')
+def _crash_for(msg):
+    try:
+        raise ValueError(msg)
+    except ValueError as e:
+        return A.crash_text(type(e), e, e.__traceback__)
+
+r = _crash_for('ячейка: +7 999 123-45-67')
+check('телефон в отчёт не попал', '999' not in r and 'скрыто' in r)
+r = _crash_for('строка: ivanov@mail.ru не разобрана')
+check('почта в отчёт не попала', 'ivanov' not in r)
+r = _crash_for(r'нет файла I:\база Иванов.csv')
+check('путь с пробелом не попал в отчёт', 'база' not in r and 'Иванов' not in r and 'скрыто' in r)
+r = _crash_for('нет файла I:' + chr(92) + 'export.csv')
+check('путь без пробела тоже скрыт', 'export' not in r and 'скрыто' in r)
+r = _crash_for('нет файла /home/pulsius/secret.csv')
+check('домашний каталог скрыт', 'pulsius' not in r and 'secret' not in r)
+r = _crash_for('колонок 8, строк 400')
+check('безобидное сообщение остаётся', 'колонок 8' in r)
+check('версия и система названы', A.VERSION in r and 'система:' in r)
+u = A.issue_url('тело обращения', 'Сбой')
+check('обращение открывается на github', u.startswith('https://github.com/kurzemnek/transgran-monstr/issues/new?'))
+check('текст уезжает в параметрах ссылки', 'body=' in u and 'title=' in u)
+
 print('\n── пропавший файл объясняется словами ──')
 import subprocess as _sp
 here = os.path.dirname(os.path.abspath(__file__))

@@ -23,6 +23,7 @@ import hmac
 import io
 import json
 import os
+import platform
 import re
 import secrets
 import sys
@@ -446,7 +447,7 @@ def save_salt(value):
             pass
 
 
-VERSION = '1.4.1'
+VERSION = '1.5'
 # Манифест обновления — обычный JSON на любом статическом хостинге:
 #   {"version": "1.3",
 #    "url": "https://.../TRANSGRAN-MONSTR.exe",
@@ -1009,6 +1010,58 @@ MONO    = 'Consolas' if IS_WIN else ('Menlo' if IS_MAC else 'DejaVu Sans Mono')
 ACT_LABEL = {'hash': 'ХЕШ', 'drop': 'СОЖРАТЬ', 'keep': 'ОСТАВИТЬ'}
 ACT_COLOR = {'hash': YELLOW, 'drop': MAGENTA, 'keep': ACID}
 
+REPO = 'https://github.com/kurzemnek/transgran-monstr'
+ISSUES = REPO + '/issues/new'
+PATH_RX = re.compile(r'(?:[A-Za-z]:\\[^\s]*|/(?:home|Users|mnt|tmp)/[^\s]*)')
+
+
+def issue_url(body='', title='Сбой в программе'):
+    """Заготовка обращения: отправляет её человек из своего браузера."""
+    return ISSUES + '?' + urllib.parse.urlencode({'title': title, 'body': body[:1500]})
+
+
+def crash_text(exc_type, exc, tb, extra=''):
+    """Отчёт о сбое: где сломалось, без того, что обрабатывалось.
+
+    В сообщении исключения и в путях живут данные пользователя — имя файла
+    вида «база Иванов.csv», содержимое ячейки, логин в пути профиля. Поэтому
+    в отчёт идут только тип ошибки, место в коде и обстановка; сообщение
+    проходит тот же детектор, что и таблицы, и при находке не попадает вовсе.
+    """
+    import traceback
+    lines = ['ТРАНСГРАНИЧНЫЙ МОНСТР ' + VERSION,
+             'система: %s %s, python %s' % (platform.system(), platform.release(),
+                                            platform.python_version()),
+             'ошибка: ' + exc_type.__name__]
+    msg = str(exc or '')
+    if msg and PATH_RX.search(msg):
+        lines.append('сообщение скрыто: в нём путь к файлу')
+    elif msg and has_pii(msg, weak=True):
+        lines.append('сообщение скрыто: в нём найдены контактные данные')
+    elif msg:
+        lines.append('сообщение: ' + msg[:300])
+    lines.append('')
+    lines.append('место:')
+    for fr in traceback.extract_tb(tb):
+        lines.append('  %s, строка %d, %s' % (os.path.basename(fr.filename), fr.lineno, fr.name))
+    if extra:
+        lines.append('')
+        lines.append(extra)
+    return '\n'.join(lines)
+
+
+def save_crash(text):
+    """Отчёт ложится рядом с настройками: отправлять его или нет — решает человек."""
+    try:
+        os.makedirs(salt_dir(), exist_ok=True)
+        path = os.path.join(salt_dir(), 'отчёт-о-сбое.txt')
+        with io.open(path, 'w', encoding='utf-8') as f:
+            f.write(text)
+        return path
+    except Exception:
+        return None
+
+
 SITE = 'https://kurzemnek.ru'
 TG = 'https://t.me/vkurzemnek'
 CLAUDE_URL = 'https://claude.com/claude-code'
@@ -1027,6 +1080,46 @@ def gui(preset=None):
 
     state = {'path': None, 'paths': [], 'plan': None, 'busy': False,
              'tab': 'РАЗВЕДКА', 'sound': False}
+
+    def crash_window(text):
+        path = save_crash(text)
+        win = tk.Toplevel(root)
+        win.title('СБОЙ')
+        win.configure(bg=BG)
+        tk.Label(win, text='МОНСТР ПОДАВИЛСЯ', font=(MONO, 16, 'bold'),
+                 fg=RED, bg=BG).pack(anchor='w', padx=18, pady=(16, 4))
+        tk.Label(win, text='Исходный файл не тронут. Наружу не ушло ничего.',
+                 font=(MONO, 10), fg=CYAN, bg=BG).pack(anchor='w', padx=18)
+        box = tk.Text(win, bg=PANEL, fg='#c8c8d4', font=(MONO, 9), bd=0,
+                      padx=12, pady=10, height=12, width=84, wrap='none')
+        box.pack(padx=18, pady=12, fill='both', expand=True)
+        box.insert('1.0', text)
+        box.configure(state='disabled')
+        if path:
+            tk.Label(win, text=path, font=(MONO, 8), fg=DIM, bg=BG,
+                     wraplength=700, justify='left').pack(anchor='w', padx=18)
+        row = tk.Frame(win, bg=BG)
+        row.pack(anchor='w', padx=18, pady=14)
+
+        def copy():
+            root.clipboard_clear()
+            root.clipboard_append(text)
+
+        neon(row, 'СКОПИРОВАТЬ', copy, CYAN, 10, 5).pack(side='left')
+        neon(row, 'ОТКРЫТЬ ОБРАЩЕНИЕ', lambda: webbrowser.open(issue_url(text)),
+             YELLOW, 10, 5).pack(side='left', padx=(10, 0))
+        neon(row, 'НАПИСАТЬ АВТОРУ', lambda: webbrowser.open(TG),
+             MAGENTA, 10, 5).pack(side='left', padx=(10, 0))
+        neon(row, 'ЗАКРЫТЬ', win.destroy, ACID, 10, 5).pack(side='left', padx=(10, 0))
+
+    def on_error(exc_type, exc, tb):
+        try:
+            crash_window(crash_text(exc_type, exc, tb))
+        except Exception:
+            pass
+
+    root.report_callback_exception = on_error
+    sys.excepthook = on_error
 
     def neon(parent, text, command, fg=ACID, size=11, pady=6, padx=18):
         b = tk.Label(parent, text=text, font=(MONO, size, 'bold'), fg=fg, bg=PANEL,
@@ -1437,6 +1530,11 @@ def gui(preset=None):
     # ── страница ЧТО НОВОГО ──────────────────────────────────────────────────
     news = pages['ЧТО НОВОГО']
     CHANGELOG = (
+        ('1.5', '24 сентября 2026', (
+            'сбой показывает окно с отчётом: что сломалось, где и на какой версии',
+            'отчёт чистится от контактов и путей перед тем, как попасть на экран',
+            'обратная связь и обращение об ошибке открываются одной кнопкой',
+        )),
         ('1.4.1', '24 сентября 2026', (
             'пропавший файл вместо трейсбека даёт строку «не найден»',
         )),
@@ -1579,6 +1677,13 @@ def gui(preset=None):
                       'Ушей у меня нет. Спектр есть.',
              font=(MONO, 10), fg='#c8c8d4', bg=BG, justify='left').pack(anchor='w')
     link(au, 'claude.com/claude-code', CLAUDE_URL, MAGENTA).pack(anchor='w', pady=(12, 0))
+
+    fb = tk.Frame(au, bg=BG)
+    fb.pack(anchor='w', pady=(18, 0))
+    neon(fb, 'ОБРАТНАЯ СВЯЗЬ', lambda: webbrowser.open(
+        issue_url('', 'Пожелание или вопрос')), CYAN, 10, 5).pack(side='left')
+    neon(fb, 'НАПИСАТЬ В ТЕЛЕГРАМ', lambda: webbrowser.open(TG),
+         MAGENTA, 10, 5).pack(side='left', padx=(10, 0))
 
     tk.Label(au, text='Данные остаются дома. Это не лозунг, а устройство программы.',
              font=(MONO, 9), fg=DIM, bg=BG).pack(anchor='w', pady=(18, 0))

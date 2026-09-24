@@ -6,7 +6,7 @@
 
 <img src="docs/monster.png" alt="Монстр" width="640">
 
-[![версия](https://img.shields.io/badge/версия-1.4.1-39FF14?style=flat-square)](https://github.com/kurzemnek/transgran-monstr/releases)
+[![версия](https://img.shields.io/badge/версия-1.5-39FF14?style=flat-square)](https://github.com/kurzemnek/transgran-monstr/releases)
 [![лицензия](https://img.shields.io/badge/лицензия-MIT-FF00D4?style=flat-square)](LICENSE)
 [![платформы](https://img.shields.io/badge/Windows%20%C2%B7%20macOS%20%C2%B7%20Linux-00F0FF?style=flat-square)](#скачать)
 [![зависимости](https://img.shields.io/badge/зависимостей-0-FFE600?style=flat-square)](#что-внутри)
@@ -128,6 +128,20 @@ ID    Телефон (хеш)                     Сумма
 правый клик по программе → «Открыть».
 
 Обновления программа проверяет сама и ставит одной кнопкой.
+
+## Если что-то сломалось
+
+Программа покажет окно с отчётом: что сломалось, в каком месте, на какой версии и системе.
+Копия отчёта лежит рядом с настройками — `%APPDATA%\TransgranMonstr\отчёт-о-сбое.txt`
+на Windows, `~/Library/Application Support/TransgranMonstr/` на Mac.
+
+Отчёт не содержит ваших данных: сообщение об ошибке попадает в него только после проверки
+тем же детектором, что и таблицы, а сообщения с контактами или путями к файлам скрываются
+целиком. Программа никуда его не отправляет — из окна открывается заготовка обращения
+в [Issues](https://github.com/kurzemnek/transgran-monstr/issues), отправляете вы сами.
+
+Телеметрии нет. Единственное, зачем программа выходит в сеть, — проверка обновлений,
+и её можно выключить в настройках.
 
 ## Собрать из исходников
 
