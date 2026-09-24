@@ -8,5 +8,10 @@
     "книги Excel с раздуванием и сущностями отклоняются",
     "ключ закрыт правами, источник обновления закреплён",
     "проверка готового файла стала быстрее"
-  ]
+  ],
+  "mac": {
+    "url": "https://github.com/kurzemnek/transgran-monstr/releases/latest/download/TRANSGRAN-MONSTR-macos.zip",
+    "sha256": "23e8f519b5bee468e3ff7ffa999f8e94a8478c2afa5373e079e6f3ae7d7c15ea",
+    "size": 18643812
+  }
 }
