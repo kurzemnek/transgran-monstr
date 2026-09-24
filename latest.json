@@ -1,0 +1,12 @@
+{
+  "version": "1.2",
+  "url": "https://github.com/kurzemnek/transgran-monstr/releases/latest/download/TRANSGRAN-MONSTR.exe",
+  "sha256": "d5d416a9cadbfc1da57c17d1e7fdf6861bf7628add10e81da56f041c7d1a5556",
+  "size": 11044561,
+  "notes": [
+    "несколько файлов за один раз",
+    "настройки: своя папка для результатов, музыка при запуске",
+    "проверка обновлений прямо в программе",
+    "пиксельный монстр в шапке"
+  ]
+}
