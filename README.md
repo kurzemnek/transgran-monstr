@@ -11,6 +11,11 @@
 [![платформы](https://img.shields.io/badge/Windows%20%C2%B7%20macOS%20%C2%B7%20Linux-00F0FF?style=flat-square)](#скачать)
 [![зависимости](https://img.shields.io/badge/зависимостей-0-FFE600?style=flat-square)](#что-внутри)
 
+<br>
+
+[![Скачать для Windows](https://img.shields.io/badge/СКАЧАТЬ-WINDOWS-39FF14?style=for-the-badge&logo=windows&logoColor=0B0B0B&labelColor=0B0B0B)](https://github.com/kurzemnek/transgran-monstr/releases/latest/download/TRANSGRAN-MONSTR.exe)
+[![Сайт автора](https://img.shields.io/badge/САЙТ-АВТОРА-FF00D4?style=for-the-badge&logoColor=0B0B0B&labelColor=0B0B0B)](https://kurzemnek.ru)
+
 </div>
 
 ---
@@ -109,8 +114,10 @@ ID    Телефон (хеш)                     Сумма
 
 ## Скачать
 
-Готовая сборка — на [странице релизов](https://github.com/kurzemnek/transgran-monstr/releases).
-Один файл, ничего ставить не нужно.
+**Windows:** [TRANSGRAN-MONSTR.exe](https://github.com/kurzemnek/transgran-monstr/releases/latest/download/TRANSGRAN-MONSTR.exe) — один файл, ничего ставить не нужно.
+Все версии лежат на [странице релизов](https://github.com/kurzemnek/transgran-monstr/releases).
+
+**macOS и Linux:** программа запускается из исходников, нужен Python 3.9+ — [как](#собрать-из-исходников).
 
 При первом запуске Windows покажет предупреждение SmartScreen: файл не подписан
 сертификатом издателя. «Подробнее» → «Выполнить в любом случае». На macOS —
