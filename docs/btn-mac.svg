@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="285" height="61" viewBox="0 0 285 61" role="img" aria-label="СКАЧАТЬ ДЛЯ MAC">
+  <title>СКАЧАТЬ ДЛЯ MAC</title>
+  <g shape-rendering="crispEdges">
+    <rect x="5" y="5" width="280" height="56" fill="#000000"/>
+    <rect x="0" y="0" width="280" height="56" fill="#00F0FF"/>
+    <rect x="0" y="0" width="280" height="4" fill="#FFFFFF" opacity="0.35"/>
+  </g>
+  <text x="140.0" y="36.0" textLength="228" lengthAdjust="spacingAndGlyphs"
+        font-family="DejaVu Sans Mono, Menlo, Consolas, monospace" font-size="22" font-weight="bold"
+        fill="#0B0B0B" text-anchor="middle">СКАЧАТЬ ДЛЯ MAC</text>
+</svg>

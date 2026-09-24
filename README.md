@@ -13,8 +13,8 @@
 
 <br>
 
-[![Скачать для Windows](https://img.shields.io/badge/СКАЧАТЬ_ДЛЯ_WINDOWS-39FF14?style=for-the-badge&logo=windows&logoColor=0B0B0B)](https://github.com/kurzemnek/transgran-monstr/releases/latest/download/TRANSGRAN-MONSTR.exe)
-[![Сайт автора](https://img.shields.io/badge/САЙТ_АВТОРА-FF00D4?style=for-the-badge&logo=safari&logoColor=0B0B0B)](https://kurzemnek.ru)
+<a href="https://github.com/kurzemnek/transgran-monstr/releases/latest/download/TRANSGRAN-MONSTR.exe"><img src="docs/btn-windows.svg" alt="Скачать для Windows" height="61"></a>
+<a href="https://kurzemnek.ru"><img src="docs/btn-site.svg" alt="Сайт автора" height="61"></a>
 
 </div>
 
