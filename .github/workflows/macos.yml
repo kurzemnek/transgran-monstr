@@ -57,3 +57,25 @@ jobs:
           TAG: ${{ github.event.inputs.tag || github.ref_name }}
         run: |
           gh release upload "$TAG" dist/TRANSGRAN-MONSTR-macos.zip --clobber --repo "$GITHUB_REPOSITORY"
+
+      - name: Вписать сборку в манифест обновления
+        run: |
+          python - <<'PY'
+          import hashlib, io, json, os
+          z = 'dist/TRANSGRAN-MONSTR-macos.zip'
+          h = hashlib.sha256()
+          with open(z, 'rb') as f:
+              for chunk in iter(lambda: f.read(1 << 20), b''):
+                  h.update(chunk)
+          d = json.load(io.open('latest.json', encoding='utf-8'))
+          d['mac'] = {
+              'url': 'https://github.com/kurzemnek/transgran-monstr/releases/latest/download/TRANSGRAN-MONSTR-macos.zip',
+              'sha256': h.hexdigest(),
+              'size': os.path.getsize(z),
+          }
+          io.open('latest.json', 'w', encoding='utf-8').write(json.dumps(d, ensure_ascii=False, indent=2) + '\n')
+          PY
+          git config user.name "Valery Kurzemnek"
+          git config user.email "vkurzemnek@gmail.com"
+          git add latest.json
+          git diff --cached --quiet || (git commit -m "Манифест: контрольная сумма сборки под Mac" && git push)

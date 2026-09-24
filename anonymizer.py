@@ -743,6 +743,14 @@ def app_file():
     return sys.executable if getattr(sys, 'frozen', False) else os.path.abspath(__file__)
 
 
+def app_bundle():
+    """Каталог .app, из которого запущена программа. Вне бандла — None."""
+    mark = '.app' + os.sep + 'Contents' + os.sep + 'MacOS' + os.sep
+    here = app_file()
+    i = here.find(mark)
+    return here[:i + 4] if i != -1 else None
+
+
 ALLOWED_HOSTS = ('github.com', 'raw.githubusercontent.com', 'objects.githubusercontent.com',
                  'release-assets.githubusercontent.com', 'kurzemnek.ru', 'www.kurzemnek.ru')
 
@@ -769,6 +777,23 @@ def fetch_manifest(url=UPDATE_URL, timeout=6):
         return json.loads(resp.read().decode('utf-8'))
 
 
+def update_entry(data):
+    """Из манифеста берётся файл под ту систему, где программа запущена.
+
+    Верхние `url` и `sha256` исторически указывают на exe, поэтому на Mac
+    читается отдельный раздел `mac`. Без него обновления нет вовсе: иначе
+    маковская копия скачала бы windows-файл и подменила бы им себя.
+    """
+    if IS_MAC:
+        mac = data.get('mac') or {}
+        if mac.get('url'):
+            return {'url': mac['url'], 'sha256': mac.get('sha256'), 'size': mac.get('size')}
+        return None
+    if IS_WIN and data.get('url'):
+        return {'url': data['url'], 'sha256': data.get('sha256'), 'size': data.get('size')}
+    return None
+
+
 def check_update(done, url=UPDATE_URL):
     """Тихо спрашивает сервер, есть ли версия новее. Молчит при любой ошибке."""
     def work():
@@ -776,7 +801,10 @@ def check_update(done, url=UPDATE_URL):
         try:
             data = fetch_manifest(url)
             if _vernum(data.get('version', '0')) > _vernum(VERSION):
-                info = data
+                entry = update_entry(data)
+                if entry:
+                    info = dict(data)
+                    info.update(entry)
         except Exception:
             info = None
         done(info)
@@ -822,6 +850,25 @@ def apply_update(tmp):
     занимается короткий сценарий, который ждёт выхода и стартует новую версию.
     """
     target = app_file()
+    if IS_MAC and zipfile.is_zipfile(tmp):
+        bundle = app_bundle()
+        if not bundle:
+            raise ValueError('программа запущена не из .app, обновлять нечего')
+        stage = tempfile.mkdtemp(prefix='transgran_update_')
+        subprocess.check_call(['/usr/bin/ditto', '-x', '-k', tmp, stage])
+        fresh = [os.path.join(stage, n) for n in os.listdir(stage) if n.endswith('.app')]
+        if not fresh:
+            shutil.rmtree(stage, ignore_errors=True)
+            raise ValueError('в архиве нет программы')
+        old = bundle + '.old'
+        shutil.rmtree(old, ignore_errors=True)
+        os.rename(bundle, old)
+        shutil.move(fresh[0], bundle)
+        shutil.rmtree(old, ignore_errors=True)
+        shutil.rmtree(stage, ignore_errors=True)
+        os.remove(tmp)
+        subprocess.Popen(['/usr/bin/open', '-n', bundle])
+        return True
     if IS_WIN:
         bat = os.path.join(tempfile.gettempdir(), 'transgran_update.bat')
         with open(bat, 'w', encoding='cp866') as f:

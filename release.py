@@ -30,7 +30,7 @@ def main():
     ap.add_argument('--base', default='https://github.com/kurzemnek/transgran-monstr/releases/latest/download',
                     help='папка на сайте, куда заливаются файлы')
     ap.add_argument('--exe', default=os.path.join(HERE, 'TRANSGRAN-MONSTR.exe'))
-    ap.add_argument('--mac', default=os.path.join(HERE, 'TRANSGRAN-MONSTR-mac.zip'))
+    ap.add_argument('--mac', default=os.path.join(HERE, 'TRANSGRAN-MONSTR-macos.zip'))
     ap.add_argument('--note', action='append', default=[])
     ap.add_argument('--out', default=os.path.join(HERE, 'latest.json'))
     a = ap.parse_args()

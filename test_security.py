@@ -97,6 +97,25 @@ try:
 except ValueError:
     check('без контрольной суммы не качает', True)
 
+print('\n── обновление берёт файл своей системы ──')
+win_only = {'version': '9.9', 'url': 'https://github.com/kurzemnek/transgran-monstr/releases/latest/download/TRANSGRAN-MONSTR.exe',
+            'sha256': 'a' * 64}
+both = dict(win_only, mac={'url': 'https://github.com/kurzemnek/transgran-monstr/releases/latest/download/TRANSGRAN-MONSTR-macos.zip',
+                           'sha256': 'b' * 64})
+was_win, was_mac = A.IS_WIN, A.IS_MAC
+try:
+    A.IS_WIN, A.IS_MAC = False, True
+    check('на Mac манифест без раздела mac не обновляет', A.update_entry(win_only) is None)
+    e = A.update_entry(both)
+    check('на Mac берётся архив, а не exe', bool(e) and e['url'].endswith('-macos.zip'), e and e['url'].rsplit('/', 1)[-1])
+    A.IS_WIN, A.IS_MAC = True, False
+    e = A.update_entry(both)
+    check('на Windows берётся exe', bool(e) and e['url'].endswith('.exe'), e and e['url'].rsplit('/', 1)[-1])
+    A.IS_WIN, A.IS_MAC = False, False
+    check('на Linux обновления нет', A.update_entry(both) is None)
+finally:
+    A.IS_WIN, A.IS_MAC = was_win, was_mac
+
 print('\n── регулярки против длинных строк ──')
 worst = 0
 for s in ('+' + '1' * 300, '+7' + '(-)' * 100 + '9991234567', 'a' * 400 + '@' + 'b' * 400,
