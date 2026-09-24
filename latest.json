@@ -5,5 +5,10 @@
   "size": 11074311,
   "notes": [
     "причина решения по колонке больше не врёт"
-  ]
+  ],
+  "mac": {
+    "url": "https://github.com/kurzemnek/transgran-monstr/releases/latest/download/TRANSGRAN-MONSTR-macos.zip",
+    "sha256": "405043501fc0755f1f60d46f905e72d67044bd0cef72f0282ed14a3213a01f24",
+    "size": 18686959
+  }
 }
