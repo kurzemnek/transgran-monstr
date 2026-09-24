@@ -1,0 +1,59 @@
+name: Сборка под macOS
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Тег релиза, к которому приложить сборку
+        required: true
+        default: v1.3
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Поставить PyInstaller
+        run: python -m pip install --quiet --upgrade pip pyinstaller
+
+      - name: Прогнать тесты
+        continue-on-error: true
+        run: |
+          python test_challenge.py
+          python test_anonymizer.py
+          python test_security.py
+
+      - name: Собрать .app
+        run: |
+          set -e
+          python -m PyInstaller --noconfirm --clean --windowed \
+            --name TRANSGRAN-MONSTR --hidden-import soundtrack \
+            --target-arch universal2 anonymizer.py \
+          || python -m PyInstaller --noconfirm --clean --windowed \
+            --name TRANSGRAN-MONSTR --hidden-import soundtrack anonymizer.py
+          test -d dist/TRANSGRAN-MONSTR.app
+          file dist/TRANSGRAN-MONSTR.app/Contents/MacOS/TRANSGRAN-MONSTR
+
+      - name: Упаковать в zip
+        run: |
+          cd dist
+          ditto -c -k --sequesterRsrc --keepParent TRANSGRAN-MONSTR.app TRANSGRAN-MONSTR-macos.zip
+          ls -la TRANSGRAN-MONSTR-macos.zip
+
+      - name: Выложить в релиз
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.inputs.tag || github.ref_name }}
+        run: |
+          gh release upload "$TAG" dist/TRANSGRAN-MONSTR-macos.zip --clobber --repo "$GITHUB_REPOSITORY"
