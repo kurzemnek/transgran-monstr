@@ -1,0 +1,34 @@
+name: Тесты
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Прогнать все тесты
+        shell: bash
+        env:
+          XDG_CONFIG_HOME: ${{ runner.temp }}/monster-config
+          APPDATA: ${{ runner.temp }}/monster-config
+        run: |
+          set -euo pipefail
+          python test_challenge.py
+          python test_anonymizer.py
+          python test_security.py
+          python test_regressions.py

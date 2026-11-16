@@ -46,22 +46,33 @@ check('деньги остаются', acts['Сумма'] == 'keep')
 check('UTM остаётся', acts['UTM Source'] == 'keep')
 check('воронка остаётся', acts['Воронка'] == 'keep')
 
-# ── 3. гейт ловит то, что просочилось мимо выборки ──────────────────────────
+# ── 3. поздний контакт найден до обработки, гейт остаётся независимым ──────
 p = os.path.join(tmp, 'c.csv')
 lines = ['ID;Детали']
 for i in range(1, 760):
     lines.append(f'{i};обычный текст')
 lines.append('760;позвонить на 8 999 111-22-33')
 open(p, 'w', encoding='utf-8').write('\n'.join(lines) + '\n')
-h, r = read_table(p); plan = detect(h, r)   # выборка 600 строк телефон не видит
+h, r = read_table(p); plan = detect(h, r)
 oh, orr = process(h, r, plan, salt)
 bad = gate(oh, orr)
-print('\nТест 3 — гейт на хвосте файла')
-check('колонка проскочила мимо выборки', {n: a for n, a, _ in plan}['Детали'] == 'keep')
-check('гейт поймал на выходе', bad and bad[0][0] == 'Детали' and bad[0][1] == 'телефон', str(bad))
+print('\nТест 3 — контакт на хвосте файла')
+check('разведка исключила колонку с поздним контактом', {n: a for n, a, _ in plan}['Детали'] == 'drop')
+check('обработанный результат прошёл гейт', not bad, str(bad))
 out, _, bad2, _info = run_file(p, log=lambda *_: None)
-check('файл при провале не сохранён', out is None and not os.path.exists(p.replace('.csv', '_обезличено.csv')))
+check('очищенный файл сохранён', out is not None and os.path.exists(out) and not bad2)
+unsafe_plan = [(name, 'keep', '') for name in h]
+unsafe_header, unsafe_rows = process(h, r, unsafe_plan, salt)
+bad = gate(unsafe_header, unsafe_rows)
+check('гейт независимо ловит оставленный контакт', bad == [('Детали', 'телефон')], str(bad))
 check('в отчёте гейта нет значений', all('999' not in str(x) for x in bad), str(bad))
+from unittest.mock import patch
+blocked = os.path.join(tmp, 'blocked.csv')
+open(blocked, 'w', encoding='utf-8').write('\n'.join(lines) + '\n')
+with patch('anonymizer.detect', return_value=unsafe_plan):
+    blocked_out, _, blocked_bad, _ = run_file(blocked, log=lambda *_: None)
+check('гейт блокирует сохранение при ошибке плана', blocked_out is None and blocked_bad == bad
+      and not os.path.exists(blocked.replace('.csv', '_обезличено.csv')))
 
 # ── 4. чтение xlsx ──────────────────────────────────────────────────────────
 NS = 'http://schemas.openxmlformats.org/spreadsheetml/2006/main'
