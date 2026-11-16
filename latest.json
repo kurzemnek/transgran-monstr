@@ -1,15 +1,15 @@
 {
-  "version": "1.5.2",
-  "url": "https://github.com/kurzemnek/transgran-monstr/releases/download/v1.5.2/TRANSGRAN-MONSTR.exe",
-  "sha256": "003fa145ce0e389f32b2b92a6dfa33771297f83020b6f26b6cb0d76a848de271",
-  "size": 11075763,
+  "version": "1.5.3",
+  "url": "https://github.com/kurzemnek/transgran-monstr/releases/download/v1.5.3/TRANSGRAN-MONSTR.exe",
+  "sha256": "146174f2b3dcff908453f84dfe521039c8adb6399ed0d4d3eaef40db9e76ea8f",
+  "size": 11074541,
   "notes": [
-    "Поздние контакты исключаются ещё в разведке; пустое начало не мешает хешированию",
-    "Описания «РЕЗИНА. Сотовая структура» и «МЕТАЛЛ. Размер» больше не считаются именами"
+    "Исправлена устаревшая надпись v1.3 в шапке окна: теперь показывается версия установленной сборки",
+    "Добавлена проверка версии в настоящем окне Windows; исправления таблиц из 1.5.2 сохранены"
   ],
   "mac": {
-    "url": "https://github.com/kurzemnek/transgran-monstr/releases/download/v1.5.2/TRANSGRAN-MONSTR-macos.zip",
-    "sha256": "8358f9ec17471656fe8d64c19d9bb0e91a8a1abbdd0559a7ec0285e798c6ede3",
-    "size": 18687401
+    "url": "https://github.com/kurzemnek/transgran-monstr/releases/download/v1.5.3/TRANSGRAN-MONSTR-macos.zip",
+    "sha256": "68120f22dde30c14c1cb2ab0a81a65a488b64ca132ada6ff14cbbea9b8e3398b",
+    "size": 18687889
   }
 }
