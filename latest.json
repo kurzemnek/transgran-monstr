@@ -1,14 +1,15 @@
 {
-  "version": "1.5.1",
-  "url": "https://github.com/kurzemnek/transgran-monstr/releases/latest/download/TRANSGRAN-MONSTR.exe",
-  "sha256": "f25fa731de1f0a5cf8f1f11916250e9952dbf7e0e77c7f04acd84001567703d4",
-  "size": 11074311,
+  "version": "1.5.2",
+  "url": "https://github.com/kurzemnek/transgran-monstr/releases/download/v1.5.2/TRANSGRAN-MONSTR.exe",
+  "sha256": "003fa145ce0e389f32b2b92a6dfa33771297f83020b6f26b6cb0d76a848de271",
+  "size": 11075763,
   "notes": [
-    "причина решения по колонке больше не врёт"
+    "Поздние контакты исключаются ещё в разведке; пустое начало не мешает хешированию",
+    "Описания «РЕЗИНА. Сотовая структура» и «МЕТАЛЛ. Размер» больше не считаются именами"
   ],
   "mac": {
-    "url": "https://github.com/kurzemnek/transgran-monstr/releases/latest/download/TRANSGRAN-MONSTR-macos.zip",
-    "sha256": "405043501fc0755f1f60d46f905e72d67044bd0cef72f0282ed14a3213a01f24",
-    "size": 18686959
+    "url": "https://github.com/kurzemnek/transgran-monstr/releases/download/v1.5.2/TRANSGRAN-MONSTR-macos.zip",
+    "sha256": "8358f9ec17471656fe8d64c19d9bb0e91a8a1abbdd0559a7ec0285e798c6ede3",
+    "size": 18687401
   }
 }
