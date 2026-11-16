@@ -6,6 +6,7 @@ Run: python test_regressions.py
 No customer fixtures, real settings, persistent keys, or network are used.
 """
 import csv
+import sys
 from pathlib import Path
 import tempfile
 import unittest
@@ -41,6 +42,37 @@ class SparseExportRegressions(unittest.TestCase):
             writer.writerow(header)
             writer.writerows(rows)
         return path
+
+    @unittest.skipUnless(sys.platform.startswith('win'), 'Windows GUI smoke test')
+    def test_banner_uses_current_version(self):
+        import tkinter as tk
+        label_texts = []
+
+        def inspect_window(root):
+            try:
+                root.update_idletasks()
+                root.update()
+                pending = [root]
+                while pending:
+                    widget = pending.pop()
+                    pending.extend(widget.winfo_children())
+                    if isinstance(widget, tk.Label):
+                        label_texts.append(widget.cget('text'))
+            finally:
+                root.destroy()
+
+        settings = dict(A.DEFAULTS, check_updates=False, music_on_start=False)
+        with patch.object(A, 'VERSION', 'test-current-version'), \
+                patch.object(A, 'load_settings', return_value=settings), \
+                patch.object(A, 'save_settings'), \
+                patch.object(A, 'salt_path', return_value=str(self.root / 'salt.txt')), \
+                patch.object(A, 'has_custom', return_value=False), \
+                patch.object(sys, 'excepthook', sys.excepthook), \
+                patch.object(tk.Tk, 'mainloop', inspect_window):
+            A.gui()
+        self.assertEqual([text for text in label_texts if text.startswith('v')],
+                         ['vtest-current-version'])
+        self.assertIn('версия test-current-version — установлена', label_texts)
 
     def assert_drop_and_clean_output(self, rows):
         header = ['Номер', 'Основание', 'Сумма']

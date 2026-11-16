@@ -6,7 +6,7 @@ on:
       tag:
         description: Тег релиза, к которому приложить сборку
         required: true
-        default: v1.5.2
+        default: v1.5.3
   push:
     tags:
       - 'v*'

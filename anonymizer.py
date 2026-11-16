@@ -477,7 +477,7 @@ def save_salt(value):
             pass
 
 
-VERSION = '1.5.2'
+VERSION = '1.5.3'
 # Манифест обновления — обычный JSON на любом статическом хостинге:
 #   {"version": "1.3",
 #    "url": "https://.../TRANSGRAN-MONSTR.exe",
@@ -1176,8 +1176,8 @@ def gui(preset=None):
     title_lbl = tk.Label(inner, text='ТРАНСГРАНИЧНЫЙ МОНСТР', font=(MONO, 26, 'bold'),
                          fg=ACID, bg=BG)
     title_lbl.pack(side='left')
-    tk.Label(inner, text='v1.3', font=(MONO, 11), fg=CYAN, bg=BG).pack(side='left',
-                                                                       padx=(12, 0), pady=(14, 0))
+    tk.Label(inner, text='v' + VERSION, font=(MONO, 11), fg=CYAN, bg=BG).pack(
+        side='left', padx=(12, 0), pady=(14, 0))
     mon_w = len(_IDLE[0]) * MON_PIX
     mon_h = len(_IDLE) * MON_PIX
     mon = tk.Canvas(inner, width=mon_w, height=mon_h, bg=BG, highlightthickness=0)
@@ -1560,6 +1560,9 @@ def gui(preset=None):
     # ── страница ЧТО НОВОГО ──────────────────────────────────────────────────
     news = pages['ЧТО НОВОГО']
     CHANGELOG = (
+        ('1.5.3', '16 ноября 2026', (
+            'версия в шапке окна берётся из текущего выпуска, а не из старой надписи',
+        )),
         ('1.5.2', '16 ноября 2026', (
             'разведка проверяет сохраняемые колонки целиком, включая поздние контакты',
             'пустые строки в начале колонки не мешают распознать телефон и почту',
