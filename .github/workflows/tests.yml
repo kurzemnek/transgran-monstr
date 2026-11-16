@@ -2,6 +2,7 @@ name: Тесты
 
 on:
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
@@ -26,6 +27,8 @@ jobs:
         env:
           XDG_CONFIG_HOME: ${{ runner.temp }}/monster-config
           APPDATA: ${{ runner.temp }}/monster-config
+          PYTHONUTF8: '1'
+          PYTHONIOENCODING: utf-8
         run: |
           set -euo pipefail
           python test_challenge.py
